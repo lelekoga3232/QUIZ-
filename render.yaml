@@ -3,8 +3,8 @@ services:
   - type: web
     name: quiz-app
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --worker-class eventlet --workers 1 app:app
+    buildCommand: pip install -r requirements.txt && chmod +x start.sh
+    startCommand: ./start.sh
     envVars:
       - key: FLASK_ENV
         value: production
