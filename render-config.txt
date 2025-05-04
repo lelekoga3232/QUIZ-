@@ -1,0 +1,19 @@
+Configuração para o Render.com
+============================
+
+Ao criar um novo serviço web no Render, use as seguintes configurações:
+
+1. Nome: quiz-app (ou outro nome de sua escolha)
+2. Região: Escolha a mais próxima de você
+3. Branch: master
+4. Runtime: Python 3
+5. Build Command: pip install -r requirements.txt
+6. Start Command: python server.py
+7. Plano: Free
+
+Variáveis de ambiente:
+- FLASK_ENV: production
+- SOCKETIO_ASYNC_MODE: threading
+- PYTHONUNBUFFERED: 1
+
+Importante: NÃO use o comando gunicorn com eventlet ou gevent, pois eles têm problemas de compatibilidade com Python 3.11.
