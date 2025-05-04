@@ -1,0 +1,48 @@
+# Arquivos de ambiente virtual
+venv/
+env/
+ENV/
+
+# Arquivos de cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Arquivos de log
+*.log
+log/
+logs/
+
+# Arquivos de dados locais
+data/
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Arquivos de IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
