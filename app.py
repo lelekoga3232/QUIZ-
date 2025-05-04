@@ -27,14 +27,20 @@ app.config['SECRET_KEY'] = 'quiz-youtube-live-secret-key'
 
 # Configuração otimizada do Socket.IO para evitar erros 502
 # Configuração otimizada do Socket.IO para estabilidade de longo prazo
+# Verificar se estamos no ambiente de produção (Render/Heroku)
+is_production = os.environ.get('FLASK_ENV') == 'production'
+
+# Usar eventlet em produção, threading em desenvolvimento
+async_mode = os.environ.get('SOCKETIO_ASYNC_MODE', 'eventlet' if is_production else 'threading')
+
 socketio = SocketIO(
     app, 
     cors_allowed_origins="*", 
-    async_mode='threading',  # Usar threading para estabilidade
-    ping_timeout=120,        # Aumentar timeout de ping para 2 minutos
-    ping_interval=10,        # Manter intervalo de ping em 10 segundos
+    async_mode=async_mode,    # Usar eventlet em produção
+    ping_timeout=120,         # Aumentar timeout de ping para 2 minutos
+    ping_interval=10,         # Manter intervalo de ping em 10 segundos
     reconnection_attempts=10, # Aumentar tentativas de reconexão
-    reconnection_delay=1000, # Delay inicial de reconexão em ms
+    reconnection_delay=1000,  # Delay inicial de reconexão em ms
     reconnection_delay_max=5000, # Delay máximo de reconexão em ms
     max_http_buffer_size=5e6, # Reduzir tamanho do buffer para evitar consumo excessivo de memória
     manage_session=False,     # Não gerenciar sessões para reduzir overhead
