@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet --workers 1 app:app
+web: python render_start.py
