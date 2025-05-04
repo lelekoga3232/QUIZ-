@@ -30,8 +30,8 @@ app.config['SECRET_KEY'] = 'quiz-youtube-live-secret-key'
 # Verificar se estamos no ambiente de produção (Render/Heroku)
 is_production = os.environ.get('FLASK_ENV') == 'production'
 
-# Usar eventlet em produção, threading em desenvolvimento
-async_mode = os.environ.get('SOCKETIO_ASYNC_MODE', 'eventlet' if is_production else 'threading')
+# Usar threading em todos os ambientes para maior compatibilidade
+async_mode = 'threading'
 
 socketio = SocketIO(
     app, 

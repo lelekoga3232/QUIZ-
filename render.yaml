@@ -9,7 +9,7 @@ services:
       - key: FLASK_ENV
         value: production
       - key: SOCKETIO_ASYNC_MODE
-        value: eventlet
+        value: threading
       - key: PYTHONUNBUFFERED
         value: 1
     plan: free
