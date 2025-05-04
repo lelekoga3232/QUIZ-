@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Versão HTTP</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .http-warning {
+            background-color: #ffcc00;
+            color: #333;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        #quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        #question-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .option {
+            background-color: #e0e0e0;
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .option:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .option.selected {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        #timer {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        #results-container {
+            display: none;
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #explanation {
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        #votes-container {
+            margin-top: 20px;
+        }
+        
+        .vote-bar {
+            height: 30px;
+            background-color: #e0e0e0;
+            margin-bottom: 10px;
+            position: relative;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .vote-fill {
+            height: 100%;
+            background-color: #2196F3;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        
+        .vote-text {
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            z-index: 1;
+            color: #000;
+        }
+        
+        #chat-container {
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-message {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .chat-input {
+            display: flex;
+        }
+        
+        #chat-message {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        
+        #send-chat {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #ranking-container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <div class="http-warning">
+            Você está usando a versão HTTP do quiz, otimizada para estabilidade. Atualizações em tempo real podem ter um pequeno atraso.
+        </div>
+        
+        <h1>Quiz em Tempo Real</h1>
+        
+        <div id="question-container">
+            <h2 id="question-title">Carregando pergunta...</h2>
+            <p id="question-number">Pergunta 0 de 0</p>
+            
+            <div id="timer">00:00</div>
+            
+            <div id="options-container">
+                <div class="option" data-option="A" onclick="selectOption('A')">
+                    <span class="option-letter">A:</span>
+                    <span class="option-text">Carregando...</span>
+                </div>
+                <div class="option" data-option="B" onclick="selectOption('B')">
+                    <span class="option-letter">B:</span>
+                    <span class="option-text">Carregando...</span>
+                </div>
+                <div class="option" data-option="C" onclick="selectOption('C')">
+                    <span class="option-letter">C:</span>
+                    <span class="option-text">Carregando...</span>
+                </div>
+                <div class="option" data-option="D" onclick="selectOption('D')">
+                    <span class="option-letter">D:</span>
+                    <span class="option-text">Carregando...</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="results-container">
+            <h2>Resultados</h2>
+            <p id="correct-answer">Resposta correta: <span></span></p>
+            <p id="explanation"></p>
+            
+            <div id="votes-container">
+                <h3>Votos:</h3>
+                <div class="vote-bar" data-option="A">
+                    <div class="vote-fill" style="width: 0%"></div>
+                    <div class="vote-text">A: 0 votos (0%)</div>
+                </div>
+                <div class="vote-bar" data-option="B">
+                    <div class="vote-fill" style="width: 0%"></div>
+                    <div class="vote-text">B: 0 votos (0%)</div>
+                </div>
+                <div class="vote-bar" data-option="C">
+                    <div class="vote-fill" style="width: 0%"></div>
+                    <div class="vote-text">C: 0 votos (0%)</div>
+                </div>
+                <div class="vote-bar" data-option="D">
+                    <div class="vote-fill" style="width: 0%"></div>
+                    <div class="vote-text">D: 0 votos (0%)</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Chat</h2>
+            <div id="chat-container"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-message" placeholder="Digite sua mensagem...">
+                <button id="send-chat">Enviar</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Ranking</h2>
+            <div id="ranking-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configurações
+        const POLL_INTERVAL = 2000; // Intervalo de polling em ms
+        const username = "User_" + Math.floor(Math.random() * 10000);
+        
+        // Estado
+        let quizState = {
+            currentQuestion: null,
+            questionNumber: 0,
+            totalQuestions: 0,
+            votes: {},
+            selectedOption: null,
+            lastUpdateTime: 0
+        };
+        
+        // Temporizador
+        let timerInterval;
+        let timerSeconds = 0;
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Inicializando quiz HTTP...");
+            
+            // Configurar eventos
+            document.getElementById('send-chat').addEventListener('click', sendChatMessage);
+            document.getElementById('chat-message').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendChatMessage();
+                }
+            });
+            
+            // Iniciar polling
+            checkQuizStatus();
+            setInterval(checkQuizStatus, POLL_INTERVAL);
+            setInterval(getVotes, POLL_INTERVAL);
+            setInterval(getChatMessages, POLL_INTERVAL);
+            setInterval(getRanking, POLL_INTERVAL * 2);
+            
+            // Manter conexão ativa
+            setInterval(keepAlive, 5000);
+        });
+        
+        // Verificar status do quiz
+        function checkQuizStatus() {
+            fetch('/api/quiz/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.running) {
+                        if (data.completed) {
+                            console.log("Quiz concluído");
+                            return;
+                        }
+                        
+                        // Verificar se é uma nova pergunta
+                        if (!quizState.currentQuestion || 
+                            quizState.questionNumber !== data.current_question) {
+                            
+                            // Atualizar estado
+                            quizState.currentQuestion = data.question;
+                            quizState.questionNumber = data.current_question;
+                            quizState.totalQuestions = data.total_questions;
+                            quizState.selectedOption = null;
+                            quizState.lastUpdateTime = Date.now();
+                            
+                            // Atualizar interface
+                            updateQuestionUI();
+                            
+                            // Iniciar temporizador
+                            startTimer(data.answer_time);
+                            
+                            // Esconder resultados
+                            document.getElementById('results-container').style.display = 'none';
+                        }
+                    } else {
+                        console.log("Quiz não está em execução");
+                    }
+                })
+                .catch(error => console.error('Erro ao verificar status:', error));
+        }
+        
+        // Atualizar interface da pergunta
+        function updateQuestionUI() {
+            const question = quizState.currentQuestion;
+            
+            document.getElementById('question-title').textContent = question.question;
+            document.getElementById('question-number').textContent = 
+                `Pergunta ${quizState.questionNumber} de ${quizState.totalQuestions}`;
+            
+            // Atualizar opções
+            const options = document.querySelectorAll('.option');
+            options.forEach((option, index) => {
+                const optionText = option.querySelector('.option-text');
+                optionText.textContent = question.options[index];
+                
+                // Limpar seleção
+                option.classList.remove('selected');
+            });
+        }
+        
+        // Iniciar temporizador
+        function startTimer(seconds) {
+            // Limpar temporizador anterior
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerSeconds = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                updateTimerDisplay();
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    
+                    // Verificar resultados após o tempo acabar
+                    setTimeout(getResults, 3000);
+                }
+            }, 1000);
+        }
+        
+        // Atualizar exibição do temporizador
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Selecionar opção
+        function selectOption(option) {
+            // Verificar se o temporizador ainda está rodando
+            if (timerSeconds <= 0) {
+                return;
+            }
+            
+            // Atualizar seleção visual
+            const options = document.querySelectorAll('.option');
+            options.forEach(el => {
+                if (el.dataset.option === option) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+            
+            // Registrar voto
+            quizState.selectedOption = option;
+            sendVote(option);
+        }
+        
+        // Enviar voto
+        function sendVote(option) {
+            fetch('/api/quiz/vote', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: username,
+                    vote: option
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Voto registrado: ${option}`);
+                    
+                    // Atualizar votos
+                    quizState.votes = data.votes;
+                } else {
+                    console.error(`Erro ao votar: ${data.message}`);
+                }
+            })
+            .catch(error => console.error('Erro ao enviar voto:', error));
+        }
+        
+        // Obter votos
+        function getVotes() {
+            fetch('/api/quiz/votes')
+                .then(response => response.json())
+                .then(data => {
+                    quizState.votes = data.votes;
+                    updateVotesUI();
+                })
+                .catch(error => console.error('Erro ao obter votos:', error));
+        }
+        
+        // Atualizar interface de votos
+        function updateVotesUI() {
+            const votes = quizState.votes;
+            const totalVotes = votes.A + votes.B + votes.C + votes.D;
+            
+            // Atualizar barras de votos
+            Object.keys(votes).forEach(option => {
+                const voteCount = votes[option];
+                const percentage = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+                
+                const voteBar = document.querySelector(`.vote-bar[data-option="${option}"]`);
+                const voteFill = voteBar.querySelector('.vote-fill');
+                const voteText = voteBar.querySelector('.vote-text');
+                
+                voteFill.style.width = `${percentage}%`;
+                voteText.textContent = `${option}: ${voteCount} votos (${percentage}%)`;
+            });
+        }
+        
+        // Obter resultados
+        function getResults() {
+            fetch('/api/quiz/results')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Atualizar interface de resultados
+                        document.getElementById('correct-answer').querySelector('span').textContent = data.correct_answer;
+                        document.getElementById('explanation').textContent = data.explanation;
+                        
+                        // Destacar resposta correta
+                        const options = document.querySelectorAll('.option');
+                        options.forEach(option => {
+                            if (option.dataset.option === data.correct_answer) {
+                                option.style.backgroundColor = '#4caf50';
+                                option.style.color = 'white';
+                            } else if (option.classList.contains('selected')) {
+                                option.style.backgroundColor = '#f44336';
+                                option.style.color = 'white';
+                            }
+                        });
+                        
+                        // Mostrar resultados
+                        document.getElementById('results-container').style.display = 'block';
+                        
+                        // Atualizar votos
+                        quizState.votes = data.votes;
+                        updateVotesUI();
+                    }
+                })
+                .catch(error => console.error('Erro ao obter resultados:', error));
+        }
+        
+        // Enviar mensagem de chat
+        function sendChatMessage() {
+            const messageInput = document.getElementById('chat-message');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                return;
+            }
+            
+            fetch('/api/quiz/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: username,
+                    message: message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Mensagem enviada');
+                    messageInput.value = '';
+                    
+                    // Atualizar chat imediatamente
+                    getChatMessages();
+                }
+            })
+            .catch(error => console.error('Erro ao enviar mensagem:', error));
+        }
+        
+        // Obter mensagens de chat
+        function getChatMessages() {
+            fetch('/api/quiz/chat')
+                .then(response => response.json())
+                .then(data => {
+                    updateChatUI(data.messages);
+                })
+                .catch(error => console.error('Erro ao obter mensagens:', error));
+        }
+        
+        // Atualizar interface de chat
+        function updateChatUI(messages) {
+            const chatContainer = document.getElementById('chat-container');
+            
+            // Limpar chat
+            chatContainer.innerHTML = '';
+            
+            // Adicionar mensagens
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message');
+                
+                // Destacar mensagens do usuário atual
+                if (message.author === username) {
+                    messageElement.style.backgroundColor = '#e3f2fd';
+                }
+                
+                messageElement.textContent = `${message.author}: ${message.message}`;
+                chatContainer.appendChild(messageElement);
+            });
+            
+            // Rolar para o final
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Obter ranking
+        function getRanking() {
+            fetch('/api/quiz/ranking')
+                .then(response => response.json())
+                .then(data => {
+                    updateRankingUI(data.ranking);
+                })
+                .catch(error => console.error('Erro ao obter ranking:', error));
+        }
+        
+        // Atualizar interface de ranking
+        function updateRankingUI(ranking) {
+            const rankingContainer = document.getElementById('ranking-container');
+            
+            // Limpar ranking
+            rankingContainer.innerHTML = '';
+            
+            // Adicionar itens do ranking
+            ranking.forEach((item, index) => {
+                const rankingItem = document.createElement('div');
+                rankingItem.classList.add('ranking-item');
+                
+                // Destacar usuário atual
+                if (item.user === username) {
+                    rankingItem.style.backgroundColor = '#e3f2fd';
+                    rankingItem.style.fontWeight = 'bold';
+                }
+                
+                rankingItem.innerHTML = `
+                    <span>${index + 1}. ${item.user}</span>
+                    <span>${item.score} pontos</span>
+                `;
+                
+                rankingContainer.appendChild(rankingItem);
+            });
+        }
+        
+        // Manter conexão ativa
+        function keepAlive() {
+            fetch('/api/quiz/keep-alive-http', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: username,
+                    timestamp: Date.now()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Keep-alive: ${data.server_time}`);
+                }
+            })
+            .catch(error => console.error('Erro no keep-alive:', error));
+        }
+    </script>
+</body>
+</html>

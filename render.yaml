@@ -1,17 +1,17 @@
 services:
-  # Um serviço web para o aplicativo Flask
+  # Um serviço web para o aplicativo Flask sem Socket.IO
   - type: web
-    name: quiz-app
+    name: quiz-app-http
     env: python
     runtime: python3
     rootDir: .
     buildCommand: pip install -r requirements.txt
-    startCommand: python server.py
+    startCommand: gunicorn app_render:app
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: SOCKETIO_ASYNC_MODE
-        value: threading
+      - key: RENDER
+        value: "true"
       - key: PYTHONUNBUFFERED
-        value: 1
+        value: "1"
     plan: free
